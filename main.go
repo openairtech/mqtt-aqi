@@ -11,7 +11,6 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/kkpoon/aqicalc"
 )
 
 var (
@@ -71,25 +70,29 @@ func main() {
 		syscall.SIGQUIT,
 	)
 
-	pm25Value := -1.
+	pm := PM{Pm10: -1., Pm25: -1.}
+
 	if token := client.Subscribe(*pm25Topic, 0, func(c mqtt.Client, m mqtt.Message) {
 		if debugFlag {
 			log.Printf("received PM2.5 value: %s", m.Payload())
 		}
-		if pm, err := strconv.ParseFloat(string(m.Payload()), 32); err == nil {
-			pm25Value = pm
+		if pm25, err := strconv.ParseFloat(string(m.Payload()), 32); err == nil {
+			pm.Lock()
+			defer pm.Unlock()
+			pm.Pm25 = pm25
 		}
 	}); token.Wait() && token.Error() != nil {
 		log.Fatal(token.Error())
 	}
 
-	pm10Value := -1.
 	if token := client.Subscribe(*pm10Topic, 0, func(c mqtt.Client, m mqtt.Message) {
 		if debugFlag {
 			log.Printf("received PM10 value: %s", m.Payload())
 		}
-		if pm, err := strconv.ParseFloat(string(m.Payload()), 32); err == nil {
-			pm10Value = pm
+		if pm10, err := strconv.ParseFloat(string(m.Payload()), 32); err == nil {
+			pm.Lock()
+			defer pm.Unlock()
+			pm.Pm10 = pm10
 		}
 	}); token.Wait() && token.Error() != nil {
 		log.Fatal(token.Error())
@@ -98,12 +101,12 @@ func main() {
 	for {
 		select {
 		case <-time.After(*aqiPublishPeriod):
-			if pm25Value >= 0 && pm10Value >= 0 {
-				aqiValue := aqicalc.CalculateAQI(aqicalc.Conc{PM25_24hr: pm25Value, PM10_24hr: pm10Value}).AQI
+			if pm.Valid() {
+				aqi := pm.Aqi()
 				if debugFlag {
-					log.Printf("publish AQI value: %d", aqiValue)
+					log.Printf("publish AQI value: %d", aqi)
 				}
-				if token := client.Publish(*aqiTopic, 0, *retained, strconv.Itoa(aqiValue)); token.Wait() && token.Error() != nil {
+				if token := client.Publish(*aqiTopic, 0, *retained, strconv.Itoa(aqi)); token.Wait() && token.Error() != nil {
 					log.Printf("publish error: %v", token.Error())
 				}
 			}

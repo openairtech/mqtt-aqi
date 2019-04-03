@@ -7,7 +7,7 @@ VERSION_VAR := main.Version
 TIMESTAMP_VAR := main.Timestamp
 
 VERSION ?= $(shell git describe --always --dirty --tags)
-TIMESTAMP := $(shell date -u '+%Y-%m-%d_%I:%M:%S%p')
+TIMESTAMP := $(shell date -u '+%Y-%m-%d_%H:%M:%S%p')
 
 GOBUILD_LDFLAGS := -ldflags "-s -w -X $(VERSION_VAR)=$(VERSION) -X $(TIMESTAMP_VAR)=$(TIMESTAMP)"
 
