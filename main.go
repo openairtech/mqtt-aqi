@@ -27,7 +27,7 @@ func main() {
 	host := flag.String("h", "localhost", "mqtt host to connect to")
 	port := flag.Int("p", 1883, "network port to connect to")
 
-	clientId := flag.String("i", "esp_mqtt_aqi", "mqtt client id to use")
+	clientId := flag.String("i", "openair_mqtt_aqi", "mqtt client id to use")
 	user := flag.String("u", "", "mqtt user (optional)")
 	password := flag.String("P", "", "mqtt password (optional)")
 	retained := flag.Bool("r", false, "mqtt publish retained flag")

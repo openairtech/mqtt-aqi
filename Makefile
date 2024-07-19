@@ -1,7 +1,7 @@
 .PHONY: all
 
-BIN := esp-mqtt-aqi
-PKG := esp-mqtt-aqi
+BIN := openair-mqtt-aqi
+PKG := openair-mqtt-aqi
 ARCH := amd64 arm arm64
 
 BINDIR = bin

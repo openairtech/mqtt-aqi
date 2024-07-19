@@ -1,4 +1,4 @@
-module esp-mqtt-aqi
+module openair-mqtt-aqi
 
 go 1.22.4
 
